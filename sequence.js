@@ -14,12 +14,17 @@ class Sequence {
         this.source = source;
         this.steps = steps;
         this.stepLength = stepLength;
+
         this.measureLength = stepLength * steps;
+        // Boolean array
         this.track = new Array(this.steps).map(() => false);
+        this.sources = new Array(this.steps);
 
         this.bufferTime = 0.5;
         this.running = false;
         this.currIndex = 0;
+        this.scheduleInterval = 400;
+        this.gate = 0.1;
     }
 
     /**
@@ -32,52 +37,47 @@ class Sequence {
         this.schedule();
     }
 
+    /**
+     * As long as running is true, continuously schedules entire measure if at or approaching next measure.
+     */
     schedule() {
-        const currTime = this.context.currentTime;
-        if (currTime > this.startTime - this.bufferTime) {
+        if (this.context.currentTime > this.startTime - this.bufferTime) {
             for (let i = 0; i < this.track.length; i++) {
-                const b = this.track[i];
-                if (b) {
-                    const s = this.context.createOscillator();
-                    s.frequency.value = 110;
-                    s.type = "sawtooth";
+                if (this.track[i]) {
+                    const s = this.context.createBufferSource();
+                    s.buffer = this.source;
+                    // const s = this.context.createOscillator();
+                    // s.frequency.value = 110;
+                    // s.type = "sawtooth";
                     s.connect(this.context.destination);
                     s.start(this.startTime + this.stepLength * i);
-                    s.stop(this.startTime + this.stepLength * (i + 1));
+                    // s.stop(this.startTime + Math.min(this.gate, this.stepLength) * (i + 1));
+                    this.sources[i] = s;
                 }
             }
-            this.startNow += this.measureLength;
+            // Next startTime is at the end of the current measure
+            this.startTime += this.measureLength;
+        }
+        if (this.running) {
+            setTimeout(this.schedule.bind(this), this.scheduleInterval);
         }
     }
 
-    // schedule() {
-    //     if (!this.running) return;
-    //     const currTime = this.context.currentTime;
-    //     console.log("I'm checking...");
-    //     console.log("time: " + currTime.toFixed(2));
-    //     const c = (currTime + this.bufferTime - this.startTime) / this.stepLength;
-    //     while(c >= this.currIndex) {
-    //         if (this.track[this.currIndex % this.steps]) {
-    //             console.log('c:', c);
-    //             console.log("I want to play step " + this.currIndex + " of " + this.steps);
-    //             // const s = this.context.createBufferSource();
-    //             // s.buffer = this.source;
-    //             const s = this.context.createOscillator();
-    //             s.frequency.value = 110;
-    //             s.type = "sawtooth";
-    //             s.connect(this.context.destination);
-    //             s.start(currTime + this.stepLength * this.currIndex);
-    //             s.stop(currTime + this.stepLength * (this.currIndex + 1));
-    //             console.log("startTime: " + (currTime + this.stepLength * this.currIndex).toFixed(2));
-    //         }
-    //         this.currIndex++;
-    //     }
-
-    //     setTimeout(this.schedule.bind(this), 200);
-    // }
-
+    /**
+     * If running, stops. If not running, force stops all sources in array.
+     */
     stopNow() {
-        console.log("Sequence stopping at: " + this.context.currentTime);
+        if (!this.running) {
+            console.log("Stopping all at " + this.context.currentTime);
+            for (let i = 0; i < this.sources.length; i++) {
+                if (this.sources[i]) {
+                    this.sources[i].stop();
+                    this.sources[i] = null;
+                }
+            }
+            return;
+        }
+        console.log("Sequence stopping at " + this.context.currentTime);
         this.running = false;
         this.currIndex = 0;
     }
@@ -103,6 +103,31 @@ class Sequence {
      */
     setBuffer(newBuffer) {
         this.source = newBuffer;
+    }
+
+    /**
+     * Set all beats to provided value
+     * @param {Boolean} value On or off
+     */
+    setAll(value) {
+        for (let i = 0; i < this.track.length; i++) {
+            this.track[i] = value;
+        }
+    }
+
+    /**
+     * Set nth indexes on and all others off
+     * @param {Number} n Number
+     * @param {Number} shift Modulo value
+     * @param {Number} start Starting index
+     * @param {Number} stop Stopping index
+     */
+    nthOn(n, shift = 0, start = 0, stop = -1) {
+        if (stop === -1) stop = this.track.length;
+        if (shift >= n) shift = shift % n;
+        for (let i = start; i < stop; i++) {
+            this.track[i] = (i % n == shift);
+        }
     }
 }
 

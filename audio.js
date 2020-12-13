@@ -3,65 +3,141 @@ import Sequence from './sequence.js';
 let kickSample;
 let kickBuffer;
 
+/**
+ * Holds and controls several sequences and samples
+ */
+class BeatSequencer {
+    /**
+     * Create a new BeatSequencer
+     * @param {AudioContext} context AudioContext instance to play sounds into
+     */
+    constructor(context, steps, bpm) {
+        this.context = context;
+        this.sequences = [];
+        this.samples = [];
+        this.tracks = 0
+        this.steps = steps;
+        this.bpm = bpm;
+    }
+
+    /**
+     * Adds a new sequence
+     * @param {Number} index Index of sample in sample array
+     * @returns {Number} Index of new Sequence in array
+     */
+    addSequence(index) {
+        const sample = this.getSample(index);
+        this.sequences.push(new Sequence(this.context, sample, this.steps, 1 / (this.bpm / 60 ) * 0.25));
+        this.tracks++;
+    }
+
+    /**
+     * Return sequence instance
+     * @param {Number} index Index of sequence
+     * @returns {Sequence} Sequence instance or null
+     */
+    getSequence(index) {
+        return this.sequences[index];
+    }
+
+    /**
+     * Add a new sample
+     * @param {AudioBuffer} sample AudioBuffer to use for sources
+     * @returns {Number} Index of new sample
+     */
+    addSample(sample) {
+        this.samples.push(sample);
+        return this.samples.length - 1;
+    }
+
+    /**
+     * Return sample AudioBuffer instance
+     * @param {Number} index Index of sample
+     * @returns {AudioBuffer} Sample instance or null
+     */
+    getSample(index) {
+        return this.samples[index];
+    }
+
+    start() {
+        for (let i = 0; i < this.sequences.length; i++) {
+            const element = this.sequences[i];
+            element.startNow();
+        }
+    }
+
+    stop() {
+        for (let i = 0; i < this.sequences.length; i++) {
+            const element = this.sequences[i];
+            element.stopNow();
+        }
+    }
+}
+
 const initialize = () => {
     const context = new AudioContext();
-    kickBuffer = context.createBuffer(2, context.sampleRate * 1.5, context.sampleRate);
-    const audioKickElement = document.getElementById("audio-sample-0");
-    // const kickSample = context.createMediaElementSource(audioKickElement);
+    const beats = new BeatSequencer(context, 32, 136);
+
     const buttonPlay = document.getElementById("button-play");
     const buttonStop = document.getElementById("button-stop");
 
-
-    loadKickSample(context);
-    const sequence = new Sequence(context, kickBuffer, 16, 0.1153);
-
-    sequence.setStepOn(0);
-    sequence.setStepOn(4);
-    sequence.setStepOn(8);
-    sequence.setStepOn(12);
-    sequence.setStepOn(14);
-
     buttonPlay.addEventListener("click", () => {
-        // const buffSource = context.createBufferSource();
-        // buffSource.connect(context.destination);
-        // buffSource.buffer = kickBuffer;
-        // buffSource.start(context.currentTime);
-        // buffSource.stop(context.currentTime + 5);
-
-        sequence.startNow();
+        beats.start();
     });
 
     buttonStop.addEventListener("click", () => {
-        sequence.stopNow();
+        beats.stop();
     })
+
+    attemptLoadAudio(context, './kick.ogg', (buffer) => {
+        if (buffer) {
+            const i = beats.addSample(buffer);
+            beats.addSequence(i);
+            beats.getSequence(i).nthOn(4);
+            beats.getSequence(i).nthOn(3, 1, 16, 24);
+        }
+    });
+    attemptLoadAudio(context, './snare1.ogg', (buffer) => {
+        if (buffer) {
+            const i = beats.addSample(buffer);
+            beats.addSequence(i);
+            beats.getSequence(i).nthOn(8, 4);
+            beats.getSequence(i).setStepOn(31)
+        }
+    });
+    attemptLoadAudio(context, './hat.ogg', (buffer) => {
+        if (buffer) {
+            const i = beats.addSample(buffer);
+            beats.addSequence(i);
+            beats.getSequence(i).nthOn(2);
+            beats.getSequence(i).nthOn(1, 0, 24, 28);
+        }
+    });
 };
 
-const kickLoadSuccess = (buffer) => {
-    if (!buffer) console.error("Success but error during decoding!");
-    kickBuffer = buffer;
-}
-
-const kickLoadFailure = () => {
-    console.error("Failure on decoding!");
-}
-
-const loadKickSample = (context) => {
+/**
+ * Attempts to laod a file asynchronously and place it into an AudioBuffer
+ * @param {AudioContext} context AudioContext instance
+ * @param {String} filename File name of sound
+ * @param {Function} onsuccess Callback with AudioBuffer parameter on successful load
+ * @param {Function} onerror Callback with String parameter on error
+ */
+const attemptLoadAudio = (context, filename, onsuccess, onerror) => {
     if (!context) {
         console.error("Invalid AudioContext provided!");
         return;
     }
+
     const req = new XMLHttpRequest;
-    req.open("GET", "./kick.ogg", true);
+    req.open("GET", filename, true);
     req.responseType = "arraybuffer";
 
     req.onload = () => {
-        console.log("Loaded file.\nDecoding...");
-        console.log("req:", req);
-        context.decodeAudioData(req.response, kickLoadSuccess, kickLoadFailure);
+        context.decodeAudioData(req.response, onsuccess, onerror);
     };
 
     req.onerror = () => {
-        console.log("XHR Error!");
+        if (onerror) onerror("XHR Error!");
     };
 
     req.send();
