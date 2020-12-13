@@ -1,0 +1,29 @@
+body {
+    background-color: linear-gradient(to bottom, violet, lightblue, purple, black);
+}
+
+.track-container ul {
+    list-style: none;
+}
+
+.measure {
+    display: inline-block;
+    padding: 8px;
+
+}
+
+.measure li {
+    padding: 8px;
+    display: inline-block;
+    background-color: rgba(0,0,0,0.2);
+    border-color: burlywood;
+    min-width: 32px;
+}
+
+.on {
+    background-color: rgb(50, 50, 255);
+}
+
+.off {
+    background-color: rgb(0, 0, 90);
+}
