@@ -1,5 +1,5 @@
 body {
-    background-color: linear-gradient(to bottom, violet, lightblue, purple, black);
+    background: linear-gradient(to bottom, violet, lightblue, purple, black);
 }
 
 .track-container ul {
@@ -15,8 +15,8 @@ body {
 .measure li {
     padding: 8px;
     display: inline-block;
-    background-color: rgba(0,0,0,0.2);
     border-color: burlywood;
+    color: bisque;
     min-width: 32px;
 }
 

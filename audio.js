@@ -1,8 +1,5 @@
 import Sequence from './sequence.js';
 
-let kickSample;
-let kickBuffer;
-
 /**
  * Holds and controls several sequences and samples
  */
@@ -76,7 +73,9 @@ class BeatSequencer {
 
 const initialize = () => {
     const context = new AudioContext();
-    const beats = new BeatSequencer(context, 32, 136);
+    const numSteps = 32;
+    const BPM = 140;
+    const beats = new BeatSequencer(context, numSteps, BPM);
 
     const buttonPlay = document.getElementById("button-play");
     const buttonStop = document.getElementById("button-stop");
@@ -93,27 +92,58 @@ const initialize = () => {
         if (buffer) {
             const i = beats.addSample(buffer);
             beats.addSequence(i);
-            beats.getSequence(i).nthOn(4);
-            beats.getSequence(i).nthOn(3, 1, 16, 24);
+            // beats.getSequence(i).nthOn(4);
+            // beats.getSequence(i).nthOn(3, 1, 16, 24);
         }
     });
     attemptLoadAudio(context, './snare1.ogg', (buffer) => {
         if (buffer) {
             const i = beats.addSample(buffer);
             beats.addSequence(i);
-            beats.getSequence(i).nthOn(8, 4);
-            beats.getSequence(i).setStepOn(31)
+            // beats.getSequence(i).nthOn(8, 4);
+            // beats.getSequence(i).setStepOn(31)
         }
     });
     attemptLoadAudio(context, './hat.ogg', (buffer) => {
         if (buffer) {
             const i = beats.addSample(buffer);
             beats.addSequence(i);
-            beats.getSequence(i).nthOn(2);
-            beats.getSequence(i).nthOn(1, 0, 24, 28);
+            // beats.getSequence(i).nthOn(2);
+            // beats.getSequence(i).nthOn(1, 0, 24, 28);
         }
     });
+
+    const elementTracks = document.getElementsByClassName("track-container");
+    console.log("Tracks:");
+    for (let i = 0; i < elementTracks.length; i++) {
+        const e = elementTracks.item(i);
+        e.innerHTML = generateMeasures(numSteps);
+        console.log('element:', e);
+        e.querySelectorAll("li").forEach((b,j) => {
+            b.addEventListener("click", () => {
+                beats.getSequence(i).toggle(j);
+                b.className = beats.getSequence(i).track[j] ? "on" : "off"
+            });
+        });
+    }
 };
+
+const generateMeasures = (total) => {
+    let string = "";
+    for (let i = 0; i < total / 4; i++) {
+        string += generateMeasure();
+    }
+    return string;
+};
+
+const generateMeasure = (num = 4) => {
+    let string = "<ul class=\"measure\">";
+    while(num-- > 0) {
+        string += "<li class=\"off\">[ ]</li>";
+    }
+    string += "</ul>";
+    return string;
+}
 
 /**
  * Attempts to laod a file asynchronously and place it into an AudioBuffer
