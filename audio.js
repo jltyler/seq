@@ -88,37 +88,24 @@ const initialize = () => {
         beats.stop();
     })
 
-    attemptLoadAudio(context, './kick.ogg', (buffer) => {
+    const addTrack = (buffer) => {
         if (buffer) {
             const i = beats.addSample(buffer);
             beats.addSequence(i);
-            // beats.getSequence(i).nthOn(4);
-            // beats.getSequence(i).nthOn(3, 1, 16, 24);
         }
-    });
-    attemptLoadAudio(context, './snare1.ogg', (buffer) => {
-        if (buffer) {
-            const i = beats.addSample(buffer);
-            beats.addSequence(i);
-            // beats.getSequence(i).nthOn(8, 4);
-            // beats.getSequence(i).setStepOn(31)
-        }
-    });
-    attemptLoadAudio(context, './hat.ogg', (buffer) => {
-        if (buffer) {
-            const i = beats.addSample(buffer);
-            beats.addSequence(i);
-            // beats.getSequence(i).nthOn(2);
-            // beats.getSequence(i).nthOn(1, 0, 24, 28);
-        }
-    });
+    };
+
+    attemptLoadAudio(context, './kick.ogg', addTrack);
+    attemptLoadAudio(context, './snare1.ogg', addTrack);
+    attemptLoadAudio(context, './hat.ogg', addTrack);
+    attemptLoadAudio(context, './ice.ogg', addTrack);
+    attemptLoadAudio(context, './clap.ogg', addTrack);
+    attemptLoadAudio(context, './wood.ogg', addTrack);
 
     const elementTracks = document.getElementsByClassName("track-container");
-    console.log("Tracks:");
     for (let i = 0; i < elementTracks.length; i++) {
         const e = elementTracks.item(i);
-        e.innerHTML = generateMeasures(numSteps);
-        console.log('element:', e);
+        e.innerHTML = generateMeasuresPlural(numSteps);
         e.querySelectorAll("li").forEach((b,j) => {
             b.addEventListener("click", () => {
                 beats.getSequence(i).toggle(j);
@@ -128,7 +115,11 @@ const initialize = () => {
     }
 };
 
-const generateMeasures = (total) => {
+const generateHTML = (beat) => {
+
+};
+
+const generateMeasuresPlural = (total) => {
     let string = "";
     for (let i = 0; i < total / 4; i++) {
         string += generateMeasure();
@@ -153,11 +144,6 @@ const generateMeasure = (num = 4) => {
  * @param {Function} onerror Callback with String parameter on error
  */
 const attemptLoadAudio = (context, filename, onsuccess, onerror) => {
-    if (!context) {
-        console.error("Invalid AudioContext provided!");
-        return;
-    }
-
     const req = new XMLHttpRequest;
     req.open("GET", filename, true);
     req.responseType = "arraybuffer";

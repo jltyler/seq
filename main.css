@@ -13,12 +13,14 @@ body {
 }
 
 .measure li {
-    padding: 8px;
+    padding: 4px;
     display: inline-block;
-    border-color: burlywood;
+    border: 1px black solid;
     color: bisque;
     min-width: 32px;
 }
+
+
 
 .on {
     background-color: rgb(50, 50, 255);
