@@ -1,31 +1,69 @@
 body {
-    background: linear-gradient(to bottom, violet, lightblue, purple, black);
+    background: radial-gradient(rgb(30, 22, 46), rgb(28, 21, 31), black);
+    color: bisque;
 }
 
-.track-container ul {
+button {
+    padding: 5px 20px;
+    font-size: large;
+}
+
+.button-container {
+    margin: auto;
+    max-width: 200px;
+    min-width: 100px;
+}
+
+#button-play {
+    color: lime;
+    background-color: black;
+    border: 5px solid lime;
+    border-radius: 8px;
+}
+
+#button-stop {
+    color: red;
+    background-color: black;
+    border: 5px solid red;
+    border-radius: 8px;
+}
+
+#tracks-container {
+    margin: auto;
+    max-width: 90%;
+}
+
+.track ul {
     list-style: none;
+}
+
+.track h3 {
+    margin: 0;
+    padding: 0;
 }
 
 .measure {
     display: inline-block;
     padding: 8px;
-
+    margin: 0;
 }
 
 .measure li {
     padding: 4px;
     display: inline-block;
-    border: 1px black solid;
-    color: bisque;
+    border-width: 2px;
+    border-style: solid;
     min-width: 32px;
 }
 
-
-
 .on {
     background-color: rgb(50, 50, 255);
+    color: rgb(50, 50, 255);
+    border-color: lightskyblue;
 }
 
 .off {
     background-color: rgb(0, 0, 90);
+    color: rgb(0, 0, 90);
+    border-color: darkslateblue;
 }
