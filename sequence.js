@@ -18,13 +18,15 @@ class Sequence {
         this.measureLength = stepLength * steps;
         // Boolean array
         this.track = new Array(this.steps).map(() => false);
-        this.sources = new Array(this.steps);
+        this.currentSources = new Array(this.steps);
+        this.previousSources = [];
 
         this.bufferTime = 0.5;
         this.running = false;
         this.currIndex = 0;
         this.scheduleInterval = 400;
         this.gate = 0.1;
+        this.speed = 1.0;
     }
 
     /**
@@ -32,7 +34,7 @@ class Sequence {
      */
     startNow() {
         this.startTime = this.context.currentTime;
-        console.log("Sequence starting at: " + this.startTime);
+        // console.log("Sequence starting at: " + this.startTime);
         this.running = true;
         this.schedule();
     }
@@ -42,17 +44,16 @@ class Sequence {
      */
     schedule() {
         if (this.context.currentTime > this.startTime - this.bufferTime) {
+            this.previousSources = this.currentSources.slice();
             for (let i = 0; i < this.track.length; i++) {
                 if (this.track[i]) {
                     const s = this.context.createBufferSource();
                     s.buffer = this.source;
-                    // const s = this.context.createOscillator();
-                    // s.frequency.value = 110;
-                    // s.type = "sawtooth";
                     s.connect(this.context.destination);
                     s.start(this.startTime + this.stepLength * i);
-                    // s.stop(this.startTime + Math.min(this.gate, this.stepLength) * (i + 1));
-                    this.sources[i] = s;
+                    s.playbackRate.value = this.speed;
+                    // s.stop(this.startTime + this.stepLength * i + this.gate);
+                    this.currentSources[i] = s;
                 }
             }
             // Next startTime is at the end of the current measure
@@ -68,16 +69,16 @@ class Sequence {
      */
     stopNow() {
         if (!this.running) {
-            console.log("Stopping all at " + this.context.currentTime);
-            for (let i = 0; i < this.sources.length; i++) {
-                if (this.sources[i]) {
-                    this.sources[i].stop();
-                    this.sources[i] = null;
+            // console.log("Stopping all at " + this.context.currentTime);
+            for (let i = 0; i < this.currentSources.length; i++) {
+                if (this.currentSources[i]) {
+                    this.currentSources[i].stop();
+                    this.currentSources[i] = null;
                 }
             }
             return;
         }
-        console.log("Sequence stopping at " + this.context.currentTime);
+        // console.log("Sequence stopping at " + this.context.currentTime);
         this.running = false;
         this.currIndex = 0;
     }

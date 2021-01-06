@@ -54,18 +54,42 @@ class Tracker {
         return this.samples[index];
     }
 
+    /**
+     * Start playing all sequences
+     */
     start() {
         for (let i = 0; i < this.sequences.length; i++) {
-            const element = this.sequences[i];
-            element.startNow();
+            const s = this.sequences[i];
+            s.startNow();
         }
     }
 
+    /**
+     * Stop playing all sequences at the end of the current measure
+     */
     stop() {
         for (let i = 0; i < this.sequences.length; i++) {
-            const element = this.sequences[i];
-            element.stopNow();
+            const s = this.sequences[i];
+            s.stopNow();
         }
+    }
+
+    /**
+     * Stop playing immediately
+     */
+    stopNow() {
+        for (let i = 0; i < this.sequences.length; i++) {
+            const s = this.sequences[i];
+            s.stopNow();
+            s.stopNow();
+        }
+    }
+
+    /**
+     * Number of sequences in array
+     */
+    numTracks() {
+        return this.sequences.length;
     }
 }
 

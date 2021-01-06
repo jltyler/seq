@@ -67,3 +67,7 @@ button {
     color: rgb(0, 0, 90);
     border-color: darkslateblue;
 }
+
+li.highlight {
+    border-color: white;
+}

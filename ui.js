@@ -1,3 +1,4 @@
+import Animator from './animator.js';
 import Tracker from './tracker.js';
 
 const initialize = () => {
@@ -5,19 +6,12 @@ const initialize = () => {
     const numSteps = 32;
     const BPM = 140;
     const tracker = new Tracker(context, numSteps, BPM);
+    const animator = new Animator(context);
 
     const buttonPlay = document.getElementById("button-play");
     const buttonStop = document.getElementById("button-stop");
 
     const tracksContainer = document.getElementById("tracks-container");
-
-    buttonPlay.addEventListener("click", () => {
-        tracker.start();
-    });
-
-    buttonStop.addEventListener("click", () => {
-        tracker.stop();
-    })
 
     const addTrack = (name, buffer) => {
         if (buffer) {
@@ -29,7 +23,9 @@ const initialize = () => {
 
     const addTrackElement = (name) => {
         console.log(`Adding track html for "${name}"...`);
-        let html = `<div class="track"><h3>${name}</h3>`;
+        const trackId = tracker.numTracks() - 1;
+        let html = `<div class="track" data-id="${trackId}"><h3>${name}</h3>`;
+        html += `<input type="range" min="0.01" max="3.0" value="1.0" step="0.05" class="speed-slider" data-id="${trackId}">`;
         html += generateMeasuresPlural(numSteps) + "</div>";
         tracksContainer.innerHTML += html;
     };
@@ -41,34 +37,66 @@ const initialize = () => {
     attemptLoadAudio(context, './clap.ogg', addTrack);
     attemptLoadAudio(context, './wood.ogg', addTrack);
 
-    const addBeatEvents = () => {
+    buttonPlay.disabled = true;
+    buttonStop.disabled = true;
+    // Add events for beat elements... after a short time
+    const initializeDOMStuff = () => {
+        buttonPlay.disabled = false;
+        buttonStop.disabled = false;
+        animator.init(tracksContainer, tracker.getSequence(0));
         const elementTracks = document.getElementsByClassName("track");
         for (let i = 0; i < elementTracks.length; i++) {
             const e = elementTracks.item(i);
+            e.querySelector("input").addEventListener("input", (e) => {
+                tracker.getSequence(i).speed = parseFloat(e.target.value);
+            });
             e.querySelectorAll("li").forEach((b,j) => {
                 b.addEventListener("click", () => {
                     tracker.getSequence(i).toggle(j);
-                    b.className = tracker.getSequence(i).track[j] ? "on" : "off"
+                    b.className = tracker.getSequence(i).track[j] ? "on" : "off";
                 });
             });
         }
     };
 
-    window.setTimeout(addBeatEvents, 2000);
+    window.setTimeout(initializeDOMStuff, 2000);
+
+    buttonPlay.addEventListener("click", () => {
+        const s = tracker.getSequence(0);
+        if (!s.running) tracker.start();
+        animator.start();
+    });
+
+    buttonStop.addEventListener("click", () => {
+        tracker.stop();
+        tracker.stop();
+        animator.stop();
+    })
 };
 
+/**
+ * Generates and returns measures (plural) as an html string
+ * @param {Number} num Number of measures
+ * @returns {String} HTML
+ */
 const generateMeasuresPlural = (total) => {
     let string = "";
     for (let i = 0; i < total / 4; i++) {
-        string += generateMeasure();
+        string += generateMeasure(4, i * 4);
     }
     return string;
 };
 
-const generateMeasure = (num = 4) => {
+/**
+ * Generates and returns a measure as an html string
+ * @param {Number} num Number of beats
+ * @param {Number} index Starting id for
+ * @returns {String} HTML
+ */
+const generateMeasure = (num = 4, index = 0) => {
     let string = "<ul class=\"measure\">";
-    while(num-- > 0) {
-        string += "<li class=\"off\">#</li>";
+    for (let i = 0; i < num; ++i) {
+        string += `<li class="off" data-id="${index + i}">#</li>`;
     }
     string += "</ul>";
     return string;
@@ -83,8 +111,6 @@ const trimName = (filename) => {
     const f = filename.slice(filename.lastIndexOf("/") + 1).split(".")[0];
     return f[0].toUpperCase() + f.slice(1);
 }
-
-
 
 /**
  * Attempts to laod a file asynchronously and place it into an AudioBuffer
