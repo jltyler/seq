@@ -40,6 +40,19 @@ button {
 .track h3 {
     margin: 0;
     padding: 0;
+    display: inline-block;
+}
+
+.track > div {
+    display: inline-block;
+}
+
+.track-controls {
+    display: inline-block;
+}
+
+.track-controls.hide {
+    display: none;
 }
 
 .measure {

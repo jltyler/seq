@@ -25,7 +25,7 @@ class Sequence {
         this.running = false;
         this.currIndex = 0;
         this.scheduleInterval = 400;
-        this.gate = 0.1;
+        this.gate = 1.0;
         this.speed = 1.0;
     }
 
@@ -52,7 +52,7 @@ class Sequence {
                     s.connect(this.context.destination);
                     s.start(this.startTime + this.stepLength * i);
                     s.playbackRate.value = this.speed;
-                    // s.stop(this.startTime + this.stepLength * i + this.gate);
+                    s.stop(this.startTime + this.stepLength * i + this.gate * this.source.duration);
                     this.currentSources[i] = s;
                 }
             }
