@@ -1,8 +1,9 @@
 import Animator from './animator.js';
 import Tracker from './tracker.js';
 
-const initialize = () => {
+const initialize = async () => {
     const context = new AudioContext();
+    await context.audioWorklet.addModule('./bitcrusher.js');
     const numSteps = 32;
     const BPM = 140;
     const tracker = new Tracker(context, numSteps, BPM);
@@ -26,9 +27,10 @@ const initialize = () => {
         const trackId = tracker.numTracks() - 1;
         let html = `<div class="track" data-id="${trackId}">`;
         html += `<div><h3>${name}</h3>`;
-        html += `<input type="range" min="0.01" max="1.0" value="1.0" step="0.01" class="gain-slider" data-id="${trackId}">`;
-        html += `<input type="range" min="0.01" max="3.0" value="1.0" step="0.01" class="speed-slider" data-id="${trackId}">`;
+        html += `<input type="range" min="0.0" max="1.0" value="1.0" step="0.01" class="gain-slider" data-id="${trackId}">`;
+        html += `<input type="range" min="0.01" max="2.0" value="1.0" step="0.01" class="speed-slider" data-id="${trackId}">`;
         html += `<input type="range" min="0.01" max="1.0" value="1.0" step="0.01" class="gate-slider" data-id="${trackId}">`;
+        html += `<input type="range" min="0.0" max="1.0" value="0.0" step="0.01" class="echo-slider" data-id="${trackId}">`;
         html += `</div>`;
         html += "<div>" + generateMeasuresPlural(numSteps) + "</div></div>";
         tracksContainer.innerHTML += html;
@@ -60,6 +62,9 @@ const initialize = () => {
             e.querySelector("input.gate-slider").addEventListener("input", (e) => {
                 tracker.getSequence(i).gate = parseFloat(e.target.value);
             });
+            e.querySelector("input.echo-slider").addEventListener("input", (e) => {
+                tracker.getSequence(i).setEchoGain(parseFloat(e.target.value));
+            });
             e.querySelectorAll("li").forEach((b,j) => {
                 b.addEventListener("click", () => {
                     tracker.getSequence(i).toggle(j);
@@ -69,8 +74,6 @@ const initialize = () => {
 
         }
     };
-
-
 
     window.setTimeout(initializeDOMStuff, 2000);
 
@@ -91,7 +94,6 @@ const initialize = () => {
     });
 
     document.getElementById("effect-selector").addEventListener("change", (e) => {
-        console.log('e.target.value:', e.target.value);
         tracker.setEffect(e.target.value);
     });
 };

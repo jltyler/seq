@@ -28,26 +28,21 @@ class Tracker {
         this.steps = steps;
         this.bpm = bpm;
 
+        // Effects nodes
+        // These should probably be moved to their own class
         this.lowpass = context.createBiquadFilter();
         this.lowpass.frequency.value = 300;
         this.lowpass.Q.value = 1.3;
         this.lowpass.connect(context.destination);
 
-        this.delayPass = context.createGain();
-
-        this.delay = context.createDelay(1);
-        this.delay.delayTime.value = 1 / (bpm / 60) * 0.75;
-
-        this.delayGain = context.createGain();
-        this.delayGain.gain.value = 0.4;
-
-        this.delayPass.connect(context.destination);
-        this.delayPass.connect(this.delay).connect(this.delayGain).connect(this.delay);
-        this.delayGain.connect(context.destination);
+        this.crush = new AudioWorkletNode(context, 'bit-crusher-processor');
+        this.crush.parameters.get("bitDepth").value = 8;
+        this.crush.parameters.get("frequencyReduction").value = 1 / 20;
+        this.crush.connect(context.destination);
 
         this.effects = {
             lpfilter: this.lowpass,
-            delay: this.delayPass
+            crush: this.crush,
         };
     }
 
@@ -58,7 +53,9 @@ class Tracker {
      */
     addSequence(index) {
         const sample = this.getSample(index);
-        this.sequences.push(new Sequence(this.context, sample, this.steps, 1 / (this.bpm / 60 ) * 0.25));
+        const s = new Sequence(this.context, sample, this.steps, 1 / (this.bpm / 60 ) * 0.25);
+        this.sequences.push(s);
+        s.setEchoDelay(1 / (this.bpm / 60) * 0.75);
     }
 
     /**
@@ -134,12 +131,18 @@ class Tracker {
     setBPM(bpm) {
         if (isNaN(bpm)) return;
         this.bpm = bpm;
+        const length = 1 / (this.bpm / 60) * 0.25;
+        const echo = 1 / (this.bpm / 60) * 0.75;
         this.sequences.forEach((s) => {
-            s.setStepLength(1 / (this.bpm / 60 ) * 0.25);
+            s.setStepLength(length);
+            s.setEchoDelay(echo);
         });
-        this.delay.delayTime.value = 1 / (bpm / 60) * 0.75;
     }
 
+    /**
+     * Sets effect for all output
+     * @param {"none"|"lpfilter"} effect
+     */
     setEffect(effect) {
         if (effect === "none") {
             this.sequences.forEach((s) => {

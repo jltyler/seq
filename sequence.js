@@ -19,7 +19,13 @@ class Sequence {
         this.measureLength = stepLength * steps;
         // Boolean array
         this.track = new Array(this.steps).map(() => false);
+        /**
+         * @type {AudioBufferSourceNode[]}
+         */
         this.currentSources = new Array(this.steps);
+        /**
+         * @type {AudioBufferSourceNode[]}
+         */
         this.previousSources = [];
 
         this.bufferTime = 0.5;
@@ -29,6 +35,16 @@ class Sequence {
         this.gate = 1.0;
         this.speed = 1.0;
         this.gain = 1.0;
+
+        // Echo
+        this.delay = context.createDelay(2.0);
+        this.delayDecay = context.createGain();
+
+        this.delay.delayTime.value = 1.0;
+        this.delayDecay.gain.value = 0.0;
+
+        this.delay.connect(this.delayDecay).connect(this.delay);
+        this.delayDecay.connect(context.destination);
     }
 
     /**
@@ -36,7 +52,6 @@ class Sequence {
      */
     startNow() {
         this.startTime = this.context.currentTime;
-        // console.log("Sequence starting at: " + this.startTime);
         this.running = true;
         this.schedule();
     }
@@ -54,6 +69,7 @@ class Sequence {
                     const g = this.context.createGain();
                     g.gain.value = this.gain;
                     s.connect(g).connect(this.destination);
+                    g.connect(this.delay);
                     s.start(this.startTime + this.stepLength * i);
                     s.playbackRate.value = this.speed;
                     s.stop(this.startTime + this.stepLength * i + this.gate * this.source.duration);
@@ -73,16 +89,18 @@ class Sequence {
      */
     stopNow() {
         if (!this.running) {
-            // console.log("Stopping all at " + this.context.currentTime);
             for (let i = 0; i < this.currentSources.length; i++) {
                 if (this.currentSources[i]) {
                     this.currentSources[i].stop();
                     this.currentSources[i] = null;
                 }
+                if (this.previousSources[i]) {
+                    this.previousSources[i].stop();
+                    this.previousSources[i] = null;
+                }
             }
             return;
         }
-        // console.log("Sequence stopping at " + this.context.currentTime);
         this.running = false;
         this.currIndex = 0;
     }
@@ -135,13 +153,28 @@ class Sequence {
         }
     }
 
+    /**
+     * Sets new step length AKA seconds per beat
+     * @param {Number} newStepLength new step length in seconds
+     */
     setStepLength(newStepLength) {
         this.stepLength = newStepLength;
         this.measureLength = newStepLength * this.steps;
     }
 
+    setEchoDelay(newDelay) {
+        this.delay.delayTime.value = newDelay;
+    }
+
+    setEchoGain(newGain) {
+        this.delayDecay.gain.value = newGain;
+    }
+
     setDestination(newDestination) {
         this.destination = newDestination;
+        this.delayDecay.disconnect();
+        this.delayDecay.connect(this.delay);
+        this.delayDecay.connect(newDestination);
     }
 }
 
