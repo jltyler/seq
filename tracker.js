@@ -33,12 +33,21 @@ class Tracker {
         this.lowpass.Q.value = 1.3;
         this.lowpass.connect(context.destination);
 
+        this.delayPass = context.createGain();
+
         this.delay = context.createDelay(1);
-        this.delay.delayTime.value = 1 / (bpm / 60);
-        this.delay.connect(context.destination);
+        this.delay.delayTime.value = 1 / (bpm / 60) * 0.75;
+
+        this.delayGain = context.createGain();
+        this.delayGain.gain.value = 0.4;
+
+        this.delayPass.connect(context.destination);
+        this.delayPass.connect(this.delay).connect(this.delayGain).connect(this.delay);
+        this.delayGain.connect(context.destination);
 
         this.effects = {
-            lpfilter: this.lowpass
+            lpfilter: this.lowpass,
+            delay: this.delayPass
         };
     }
 
@@ -128,6 +137,7 @@ class Tracker {
         this.sequences.forEach((s) => {
             s.setStepLength(1 / (this.bpm / 60 ) * 0.25);
         });
+        this.delay.delayTime.value = 1 / (bpm / 60) * 0.75;
     }
 
     setEffect(effect) {
