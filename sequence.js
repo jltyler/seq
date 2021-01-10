@@ -14,6 +14,7 @@ class Sequence {
         this.source = source;
         this.steps = steps;
         this.stepLength = stepLength;
+        this.destination = context.destination;
 
         this.measureLength = stepLength * steps;
         // Boolean array
@@ -27,6 +28,7 @@ class Sequence {
         this.scheduleInterval = 400;
         this.gate = 1.0;
         this.speed = 1.0;
+        this.gain = 1.0;
     }
 
     /**
@@ -49,7 +51,9 @@ class Sequence {
                 if (this.track[i]) {
                     const s = this.context.createBufferSource();
                     s.buffer = this.source;
-                    s.connect(this.context.destination);
+                    const g = this.context.createGain();
+                    g.gain.value = this.gain;
+                    s.connect(g).connect(this.destination);
                     s.start(this.startTime + this.stepLength * i);
                     s.playbackRate.value = this.speed;
                     s.stop(this.startTime + this.stepLength * i + this.gate * this.source.duration);
@@ -129,6 +133,15 @@ class Sequence {
         for (let i = start; i < stop; i++) {
             this.track[i] = (i % n == shift);
         }
+    }
+
+    setStepLength(newStepLength) {
+        this.stepLength = newStepLength;
+        this.measureLength = newStepLength * this.steps;
+    }
+
+    setDestination(newDestination) {
+        this.destination = newDestination;
     }
 }
 

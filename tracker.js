@@ -2,18 +2,44 @@ import Sequence from './sequence.js';
 
 /**
  * Holds and controls several sequences and samples
+ * @member sequences
  */
 class Tracker {
     /**
-     * Create a new BeatSequencer
+     * Create a new Tracker
      * @param {AudioContext} context AudioContext instance to play sounds into
+     * @param {Number} steps The number of steps in a track
+     * @param {Number} bpm Beats per minute
      */
     constructor(context, steps, bpm) {
+        /**
+         * Reference to AudioContext instance
+         * @type {AudioContext}
+         */
         this.context = context;
+        /**
+         * @type {Sequence[]}
+         */
         this.sequences = [];
+        /**
+         * @type {AudioBuffer[]}
+         */
         this.samples = [];
         this.steps = steps;
         this.bpm = bpm;
+
+        this.lowpass = context.createBiquadFilter();
+        this.lowpass.frequency.value = 300;
+        this.lowpass.Q.value = 1.3;
+        this.lowpass.connect(context.destination);
+
+        this.delay = context.createDelay(1);
+        this.delay.delayTime.value = 1 / (bpm / 60);
+        this.delay.connect(context.destination);
+
+        this.effects = {
+            lpfilter: this.lowpass
+        };
     }
 
     /**
@@ -90,6 +116,32 @@ class Tracker {
      */
     numTracks() {
         return this.sequences.length;
+    }
+
+    /**
+     * Set a new BPM for all sequences
+     * @param {Number} bpm New BPM
+     */
+    setBPM(bpm) {
+        if (isNaN(bpm)) return;
+        this.bpm = bpm;
+        this.sequences.forEach((s) => {
+            s.setStepLength(1 / (this.bpm / 60 ) * 0.25);
+        });
+    }
+
+    setEffect(effect) {
+        if (effect === "none") {
+            this.sequences.forEach((s) => {
+                s.setDestination(this.context.destination);
+            });
+        }
+        if (Object.keys(this.effects).includes(effect)) {
+            this.sequences.forEach((s) => {
+                s.setDestination(this.effects[effect]);
+            });
+        }
+
     }
 }
 

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seekwince</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" media="screen" href="./main.css" />
     <script type="module" src="./main.js"></script>
 </head>
@@ -11,6 +13,11 @@
     <div class="button-container">
         <button id="button-play">PLAY</button>
         <button id="button-stop">STOP</button>
+        <input type="number" id="bpm-input" placeholder="BPM" value="140">
+        <select name="effect" id="effect-selector">
+            <option value="none">Nothing</option>
+            <option value="lpfilter">Lowpass Filter</option>
+        </select>
     </div>
     <div id="tracks-container"></div>
 </body>

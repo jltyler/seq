@@ -49,7 +49,7 @@ class Animator {
      */
     stop() {
         this.running = false;
-        this.elementGrid[this.lastPosition].forEach((e) => e.classList.remove("highlight"));
+        this.elementGrid[this.lastPosition].forEach(removeHighlight);
     }
 
     /**
@@ -63,12 +63,15 @@ class Animator {
         if (position < 0) position += s.steps;
         position = Math.trunc(position);
         if (position !== this.lastPosition) {
-            this.elementGrid[position].forEach((e) => e.classList.add("highlight"));
-            this.elementGrid[this.lastPosition].forEach((e) => e.classList.remove("highlight"));
+            this.elementGrid[position].forEach(addHighlight);
+            this.elementGrid[this.lastPosition].forEach(removeHighlight);
             this.lastPosition = position;
         }
         if (this.running) window.requestAnimationFrame(this.update);
     }
 }
+
+const addHighlight = (e) => e.classList.add("highlight");
+const removeHighlight = (e) => e.classList.remove("highlight");
 
 export default Animator;

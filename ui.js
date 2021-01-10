@@ -24,12 +24,12 @@ const initialize = () => {
     const addTrackElement = (name) => {
         console.log(`Adding track html for "${name}"...`);
         const trackId = tracker.numTracks() - 1;
-        let html = `<div class="track" data-id="${trackId}">`
-        html += `<div><h3>${name}</h3><button class="toggle-controls">+</button>`;
-        html += `<div class="track-controls hide">`;
-        html += `<input type="range" min="0.01" max="3.0" value="1.0" step="0.05" class="speed-slider" data-id="${trackId}">`;
+        let html = `<div class="track" data-id="${trackId}">`;
+        html += `<div><h3>${name}</h3>`;
+        html += `<input type="range" min="0.01" max="1.0" value="1.0" step="0.01" class="gain-slider" data-id="${trackId}">`;
+        html += `<input type="range" min="0.01" max="3.0" value="1.0" step="0.01" class="speed-slider" data-id="${trackId}">`;
         html += `<input type="range" min="0.01" max="1.0" value="1.0" step="0.01" class="gate-slider" data-id="${trackId}">`;
-        html += `</div></div>`;
+        html += `</div>`;
         html += "<div>" + generateMeasuresPlural(numSteps) + "</div></div>";
         tracksContainer.innerHTML += html;
     };
@@ -51,15 +51,14 @@ const initialize = () => {
         const elementTracks = document.getElementsByClassName("track");
         for (let i = 0; i < elementTracks.length; i++) {
             const e = elementTracks.item(i);
+            e.querySelector("input.gain-slider").addEventListener("input", (e) => {
+                tracker.getSequence(i).gain = parseFloat(e.target.value);
+            });
             e.querySelector("input.speed-slider").addEventListener("input", (e) => {
                 tracker.getSequence(i).speed = parseFloat(e.target.value);
             });
             e.querySelector("input.gate-slider").addEventListener("input", (e) => {
                 tracker.getSequence(i).gate = parseFloat(e.target.value);
-            });
-            const controlsContainer = e.querySelector(".track-controls");
-            e.querySelector("button.toggle-controls").addEventListener("click", (e) => {
-                controlsContainer.classList.toggle("hide");
             });
             e.querySelectorAll("li").forEach((b,j) => {
                 b.addEventListener("click", () => {
@@ -67,8 +66,11 @@ const initialize = () => {
                     b.className = tracker.getSequence(i).track[j] ? "on" : "off";
                 });
             });
+
         }
     };
+
+
 
     window.setTimeout(initializeDOMStuff, 2000);
 
@@ -82,6 +84,15 @@ const initialize = () => {
         tracker.stop();
         tracker.stop();
         animator.stop();
+    });
+
+    document.getElementById("bpm-input").addEventListener("input", (e) => {
+        tracker.setBPM(parseFloat(e.target.value));
+    });
+
+    document.getElementById("effect-selector").addEventListener("change", (e) => {
+        console.log('e.target.value:', e.target.value);
+        tracker.setEffect(e.target.value);
     });
 };
 
