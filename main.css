@@ -54,9 +54,9 @@ button {
 }
 
 input[type=range] {
-    margin-left: 15px;
+    margin-left: 20px;
     -webkit-appearance: none;
-    width: 100px;
+    width: 128px;
     background: transparent;
 }
 

@@ -54,6 +54,7 @@ class Tracker {
     addSequence(index) {
         const sample = this.getSample(index);
         const s = new Sequence(this.context, sample, this.steps, 1 / (this.bpm / 60 ) * 0.25);
+
         this.sequences.push(s);
         s.setEchoDelay(1 / (this.bpm / 60) * 0.75);
     }

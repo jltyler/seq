@@ -4,6 +4,12 @@ import Tracker from './tracker.js';
 const initialize = async () => {
     const context = new AudioContext();
     await context.audioWorklet.addModule('./bitcrusher.js');
+    // await context.audioWorklet.addModule('./noise.js');
+    // const noiseGen = new AudioWorkletNode(context, 'white-noise');
+    // const noiseGain = context.createGain();
+    // noiseGain.gain.value = 0.1;
+    // noiseGen.connect(noiseGain).connect(context.destination);
+
     const numSteps = 32;
     const BPM = 140;
     const tracker = new Tracker(context, numSteps, BPM);
@@ -27,6 +33,9 @@ const initialize = async () => {
         const trackId = tracker.numTracks() - 1;
         let html = `<div class="track" data-id="${trackId}">`;
         html += `<div><h3>${name}</h3>`;
+        html += `<button class="clear-track">X</button>`;
+        html += `<button class="fill-track">O</button>`;
+        html += `<button class="toggle-track">!</button>`;
         html += `<input type="range" min="0.0" max="1.0" value="1.0" step="0.01" class="gain-slider" data-id="${trackId}">`;
         html += `<input type="range" min="0.01" max="2.0" value="1.0" step="0.01" class="speed-slider" data-id="${trackId}">`;
         html += `<input type="range" min="0.01" max="1.0" value="1.0" step="0.01" class="gate-slider" data-id="${trackId}">`;
@@ -53,6 +62,22 @@ const initialize = async () => {
         const elementTracks = document.getElementsByClassName("track");
         for (let i = 0; i < elementTracks.length; i++) {
             const e = elementTracks.item(i);
+            const beats = e.querySelectorAll("li");
+            e.querySelector("button.clear-track").addEventListener("click", () => {
+                tracker.getSequence(i).setAll(false);
+                beats.forEach((e) => e.className = "off");
+            });
+            e.querySelector("button.fill-track").addEventListener("click", () => {
+                tracker.getSequence(i).setAll(true);
+                beats.forEach((e) => e.className = "on");
+            });
+            e.querySelector("button.toggle-track").addEventListener("click", () => {
+                tracker.getSequence(i).toggleAll();
+                beats.forEach((e) => {
+                    e.classList.toggle("on");
+                    e.classList.toggle("off");
+                });
+            });
             e.querySelector("input.gain-slider").addEventListener("input", (e) => {
                 tracker.getSequence(i).gain = parseFloat(e.target.value);
             });
@@ -65,7 +90,7 @@ const initialize = async () => {
             e.querySelector("input.echo-slider").addEventListener("input", (e) => {
                 tracker.getSequence(i).setEchoGain(parseFloat(e.target.value));
             });
-            e.querySelectorAll("li").forEach((b,j) => {
+            beats.forEach((b,j) => {
                 b.addEventListener("click", () => {
                     tracker.getSequence(i).toggle(j);
                     b.className = tracker.getSequence(i).track[j] ? "on" : "off";

@@ -19,6 +19,7 @@ class Sequence {
         this.measureLength = stepLength * steps;
         // Boolean array
         this.track = new Array(this.steps).map(() => false);
+        // this.retriggers = Array(this.steps).map(() => false);
         /**
          * @type {AudioBufferSourceNode[]}
          */
@@ -45,6 +46,9 @@ class Sequence {
 
         this.delay.connect(this.delayDecay).connect(this.delay);
         this.delayDecay.connect(context.destination);
+
+        // This method is used in events
+        this.schedule = this.schedule.bind(this);
     }
 
     /**
@@ -60,6 +64,7 @@ class Sequence {
      * As long as running is true, continuously schedules entire measure if at or approaching next measure.
      */
     schedule() {
+        if (!this.running) return;
         if (this.context.currentTime > this.startTime - this.bufferTime) {
             this.previousSources = this.currentSources.slice();
             for (let i = 0; i < this.track.length; i++) {
@@ -79,9 +84,9 @@ class Sequence {
             // Next startTime is at the end of the current measure
             this.startTime += this.measureLength;
         }
-        if (this.running) {
-            setTimeout(this.schedule.bind(this), this.scheduleInterval);
-        }
+        // if (this.running) {
+        setTimeout(this.schedule, this.scheduleInterval);
+        // }
     }
 
     /**
@@ -118,6 +123,12 @@ class Sequence {
     toggle(index) {
         if (index >= this.track.length) return;
         this.track[index] = !this.track[index];
+    }
+
+    toggleAll() {
+        for (let i = 0; i < this.track.length; i++) {
+            this.track[i] = !this.track[i];
+        }
     }
 
     /**
