@@ -36,8 +36,10 @@ class Tracker {
         this.lowpass.connect(context.destination);
 
         this.crush = new AudioWorkletNode(context, 'bit-crusher-processor');
-        this.crush.parameters.get("bitDepth").value = 8;
-        this.crush.parameters.get("frequencyReduction").value = 1 / 20;
+        this.crush.bitDepth = this.crush.parameters.get("bitDepth");
+        this.crush.frequencyReduction = this.crush.parameters.get("frequencyReduction");
+        this.crush.bitDepth.value = 8;
+        this.crush.frequencyReduction.value = 1 / 20;
         this.crush.connect(context.destination);
 
         this.effects = {
@@ -156,6 +158,22 @@ class Tracker {
             });
         }
 
+    }
+
+    setFilterFrequency(freq) {
+        this.lowpass.frequency.value = freq;
+    }
+
+    setFilterQ(q) {
+        this.lowpass.Q.value = q;
+    }
+
+    setCrusherBitDepth(bits) {
+        this.crush.bitDepth.value = bits;
+    }
+
+    setCrusherFrequency(freq) {
+        this.crush.frequencyReduction.value = 1 / freq;
     }
 }
 

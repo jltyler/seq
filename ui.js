@@ -51,6 +51,7 @@ const initialize = async () => {
     attemptLoadAudio(context, './ice.ogg', addTrack);
     attemptLoadAudio(context, './clap.ogg', addTrack);
     attemptLoadAudio(context, './wood.ogg', addTrack);
+    attemptLoadAudio(context, './tom.ogg', addTrack);
 
     buttonPlay.disabled = true;
     buttonStop.disabled = true;
@@ -120,6 +121,22 @@ const initialize = async () => {
 
     document.getElementById("effect-selector").addEventListener("change", (e) => {
         tracker.setEffect(e.target.value);
+    });
+
+    document.getElementById("filter-cutoff").addEventListener("change", (e) => {
+        tracker.setFilterFrequency(parseFloat(e.target.value));
+    });
+
+    document.getElementById("filter-q").addEventListener("change", (e) => {
+        tracker.setFilterQ(parseFloat(e.target.value));
+    });
+
+    document.getElementById("crusher-bitdepth").addEventListener("change", (e) => {
+        tracker.setCrusherBitDepth(parseFloat(e.target.value));
+    });
+
+    document.getElementById("crusher-frequency").addEventListener("change", (e) => {
+        tracker.setCrusherFrequency(parseFloat(e.target.value));
     });
 };
 

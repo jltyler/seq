@@ -9,10 +9,18 @@ button {
     font-size: large;
 }
 
-.button-container {
+.main-controls {
     margin: auto;
     max-width: 300px;
     min-width: 100px;
+}
+
+.filter-controls {
+    border: 1px solid lime;
+}
+
+.crusher-controls {
+    border: 1px solid blue;
 }
 
 #button-play {
@@ -34,7 +42,7 @@ button {
     border: 1px solid darkslategray;
     width: 64px;
     color: aliceblue;
-    -moz-appearance: textfield;
+    /* -moz-appearance: textfield; */
 }
 
 #tracks-container {
