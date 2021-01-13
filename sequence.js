@@ -35,7 +35,9 @@ class Sequence {
         this.scheduleInterval = 400;
         this.gate = 1.0;
         this.speed = 1.0;
-        this.gain = 1.0;
+
+        this.gain = context.createGain();
+        this.gain.connect(this.destination);
 
         // Echo
         this.delay = context.createDelay(2.0);
@@ -45,7 +47,7 @@ class Sequence {
         this.delayDecay.gain.value = 0.0;
 
         this.delay.connect(this.delayDecay).connect(this.delay);
-        this.delayDecay.connect(context.destination);
+        this.delayDecay.connect(this.gain);
 
         // This method is used in events
         this.schedule = this.schedule.bind(this);
@@ -71,13 +73,11 @@ class Sequence {
                 if (this.track[i]) {
                     const s = this.context.createBufferSource();
                     s.buffer = this.source;
-                    const g = this.context.createGain();
-                    g.gain.value = this.gain;
-                    s.connect(g).connect(this.destination);
-                    g.connect(this.delay);
+                    s.connect(this.gain);
+                    s.connect(this.delay);
                     s.start(this.startTime + this.stepLength * i);
                     s.playbackRate.value = this.speed;
-                    s.stop(this.startTime + this.stepLength * i + this.gate * this.source.duration);
+                    s.stop(this.startTime + this.stepLength * i + this.gate * this.source.duration * (1 / this.speed));
                     this.currentSources[i] = s;
                 }
             }
@@ -123,7 +123,18 @@ class Sequence {
     toggle(index) {
         if (index >= this.track.length) return;
         this.track[index] = !this.track[index];
+        // if (this.running) {
+        //     if (this.track[index]) {
+
+        //     } else {
+
+        //     }
+        // }
     }
+
+    // timeIndex(index) {
+    //     return this.stepLength * index;
+    // }
 
     toggleAll() {
         for (let i = 0; i < this.track.length; i++) {
@@ -183,9 +194,21 @@ class Sequence {
 
     setDestination(newDestination) {
         this.destination = newDestination;
-        this.delayDecay.disconnect();
-        this.delayDecay.connect(this.delay);
-        this.delayDecay.connect(newDestination);
+        // this.delayDecay.disconnect();
+        // this.delayDecay.connect(this.delay);
+        // this.delayDecay.connect(newDestination);
+        this.gain.disconnect();
+        this.gain.connect(newDestination);
+    }
+
+    setGain(newGain) {
+        this.gain.gain.value = newGain;
+    }
+    setSpeed(newSpeed) {
+        this.speed = newSpeed;
+    }
+    setGate(newGate) {
+        this.gate = newGate;
     }
 }
 

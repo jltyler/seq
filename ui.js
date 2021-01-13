@@ -80,13 +80,13 @@ const initialize = async () => {
                 });
             });
             e.querySelector("input.gain-slider").addEventListener("input", (e) => {
-                tracker.getSequence(i).gain = parseFloat(e.target.value);
+                tracker.getSequence(i).setGain(parseFloat(e.target.value));
             });
             e.querySelector("input.speed-slider").addEventListener("input", (e) => {
-                tracker.getSequence(i).speed = parseFloat(e.target.value);
+                tracker.getSequence(i).setSpeed(parseFloat(e.target.value));
             });
             e.querySelector("input.gate-slider").addEventListener("input", (e) => {
-                tracker.getSequence(i).gate = parseFloat(e.target.value);
+                tracker.getSequence(i).setGate(parseFloat(e.target.value));
             });
             e.querySelector("input.echo-slider").addEventListener("input", (e) => {
                 tracker.getSequence(i).setEchoGain(parseFloat(e.target.value));
@@ -123,19 +123,19 @@ const initialize = async () => {
         tracker.setEffect(e.target.value);
     });
 
-    document.getElementById("filter-cutoff").addEventListener("change", (e) => {
-        tracker.setFilterFrequency(parseFloat(e.target.value));
+    document.getElementById("filter-cutoff").addEventListener("input", (e) => {
+        tracker.setFilterFrequency(e.target.value === "11001" ? 22050 : parseFloat(e.target.value));
     });
 
-    document.getElementById("filter-q").addEventListener("change", (e) => {
+    document.getElementById("filter-q").addEventListener("input", (e) => {
         tracker.setFilterQ(parseFloat(e.target.value));
     });
 
-    document.getElementById("crusher-bitdepth").addEventListener("change", (e) => {
+    document.getElementById("crusher-bitdepth").addEventListener("input", (e) => {
         tracker.setCrusherBitDepth(parseFloat(e.target.value));
     });
 
-    document.getElementById("crusher-frequency").addEventListener("change", (e) => {
+    document.getElementById("crusher-frequency").addEventListener("input", (e) => {
         tracker.setCrusherFrequency(parseFloat(e.target.value));
     });
 };
