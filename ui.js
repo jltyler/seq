@@ -17,12 +17,13 @@ const initialize = async () => {
 
     const buttonPlay = document.getElementById("button-play");
     const buttonStop = document.getElementById("button-stop");
+    const jsonArea = document.getElementById("json-area");
 
     const tracksContainer = document.getElementById("tracks-container");
 
     const addTrack = (name, buffer) => {
         if (buffer) {
-            const i = tracker.addSample(buffer);
+            const i = tracker.addSample(buffer, name);
             tracker.addSequence(i);
             addTrackElement(name);
         }
@@ -154,6 +155,14 @@ const initialize = async () => {
 
     document.getElementById("crusher-frequency").addEventListener("input", (e) => {
         tracker.setCrusherFrequency(parseFloat(e.target.value));
+    });
+
+    document.getElementById("export-json").addEventListener("click", () => {
+        tracker.exportState(jsonArea);
+    });
+
+    document.getElementById("import-json").addEventListener("click", () => {
+        tracker.importState(jsonArea.value);
     });
 };
 

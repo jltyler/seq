@@ -75,8 +75,9 @@ class Tracker {
      * @param {AudioBuffer} sample AudioBuffer to use for sources
      * @returns {Number} Index of new sample
      */
-    addSample(sample) {
+    addSample(sample, name) {
         this.samples.push(sample);
+        sample.name = name;
         return this.samples.length - 1;
     }
 
@@ -157,7 +158,6 @@ class Tracker {
                 s.setDestination(this.effects[effect]);
             });
         }
-
     }
 
     setFilterFrequency(freq) {
@@ -174,6 +174,46 @@ class Tracker {
 
     setCrusherFrequency(freq) {
         this.crush.frequencyReduction.value = 1 / freq;
+    }
+
+    /**
+     * Returns converted pattern into a json string and places it in the text area
+     * @param {HTMLElement} textarea HTML Text area
+     */
+    exportState(textarea) {
+        const arr = this.sequences.map((s, i) => {
+            return {
+                name: this.getSample(i).name,
+                track: s.track.map((b) => b ? 1 : 0),
+                gate: s.gate,
+                speed: s.speed,
+                gain: s.gain.gain.value,
+                delayGain: s.delayDecay.gain.value,
+                delayTime: Math.floor((s.delay.delayTime.value / s.stepLength) + 0.5),
+            };
+        });
+        const s = JSON.stringify({
+            bpm: this.bpm,
+            sequences: arr
+        });
+        console.log(s);
+        if (textarea) textarea.value = s;
+    }
+
+    importState(json) {
+        const parsed = JSON.parse(json);
+        console.log(parsed);
+        this.setBPM(parsed.bpm);
+        parsed.sequences.forEach((o) => {
+            const i = this.samples.findIndex((samp) => samp.name === o.name);
+            const s = this.getSequence(i);
+            s.setGain(o.gain);
+            s.setSpeed(o.speed);
+            s.setGate(o.gate);
+            s.setEchoGain(o.delayGain);
+            s.setEchoDelay(o.delayTime * s.stepLength);
+            s.setTrackFromArray(o.track);
+        });
     }
 }
 
