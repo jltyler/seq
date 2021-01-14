@@ -39,6 +39,10 @@ const initialize = async () => {
         html += `<input type="range" min="0.0" max="1.0" value="1.0" step="0.01" class="gain-slider" data-id="${trackId}">`;
         html += `<input type="range" min="0.01" max="2.0" value="1.0" step="0.01" class="speed-slider" data-id="${trackId}">`;
         html += `<input type="range" min="0.01" max="1.0" value="1.0" step="0.01" class="gate-slider" data-id="${trackId}">`;
+        html += `<button class="echo-half">1/2</button>`;
+        html += `<button class="echo-three-quarters">3/4</button>`;
+        html += `<button class="echo-one">1</button>`;
+        html += `<button class="echo-three-halfs">3/2</button>`;
         html += `<input type="range" min="0.0" max="1.0" value="0.0" step="0.01" class="echo-slider" data-id="${trackId}">`;
         html += `</div>`;
         html += "<div>" + generateMeasuresPlural(numSteps) + "</div></div>";
@@ -64,37 +68,50 @@ const initialize = async () => {
         for (let i = 0; i < elementTracks.length; i++) {
             const e = elementTracks.item(i);
             const beats = e.querySelectorAll("li");
+            const sequence = tracker.getSequence(i);
             e.querySelector("button.clear-track").addEventListener("click", () => {
-                tracker.getSequence(i).setAll(false);
+                sequence.setAll(false);
                 beats.forEach((e) => e.className = "off");
             });
             e.querySelector("button.fill-track").addEventListener("click", () => {
-                tracker.getSequence(i).setAll(true);
+                sequence.setAll(true);
                 beats.forEach((e) => e.className = "on");
             });
             e.querySelector("button.toggle-track").addEventListener("click", () => {
-                tracker.getSequence(i).toggleAll();
+                sequence.toggleAll();
                 beats.forEach((e) => {
                     e.classList.toggle("on");
                     e.classList.toggle("off");
                 });
             });
+            e.querySelector("button.echo-half").addEventListener("click", () => {
+                sequence.setEchoDelay(sequence.stepLength * 2);
+            });
+            e.querySelector("button.echo-three-quarters").addEventListener("click", () => {
+                sequence.setEchoDelay(sequence.stepLength * 3);
+            });
+            e.querySelector("button.echo-one").addEventListener("click", () => {
+                sequence.setEchoDelay(sequence.stepLength * 4);
+            });
+            e.querySelector("button.echo-three-halfs").addEventListener("click", () => {
+                sequence.setEchoDelay(sequence.stepLength * 6);
+            });
             e.querySelector("input.gain-slider").addEventListener("input", (e) => {
-                tracker.getSequence(i).setGain(parseFloat(e.target.value));
+                sequence.setGain(parseFloat(e.target.value));
             });
             e.querySelector("input.speed-slider").addEventListener("input", (e) => {
-                tracker.getSequence(i).setSpeed(parseFloat(e.target.value));
+                sequence.setSpeed(parseFloat(e.target.value));
             });
             e.querySelector("input.gate-slider").addEventListener("input", (e) => {
-                tracker.getSequence(i).setGate(parseFloat(e.target.value));
+                sequence.setGate(parseFloat(e.target.value));
             });
             e.querySelector("input.echo-slider").addEventListener("input", (e) => {
-                tracker.getSequence(i).setEchoGain(parseFloat(e.target.value));
+                sequence.setEchoGain(parseFloat(e.target.value));
             });
             beats.forEach((b,j) => {
                 b.addEventListener("click", () => {
-                    tracker.getSequence(i).toggle(j);
-                    b.className = tracker.getSequence(i).track[j] ? "on" : "off";
+                    sequence.toggle(j);
+                    b.className = sequence.track[j] ? "on" : "off";
                 });
             });
 

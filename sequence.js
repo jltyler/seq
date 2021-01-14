@@ -43,7 +43,7 @@ class Sequence {
         this.delay = context.createDelay(2.0);
         this.delayDecay = context.createGain();
 
-        this.delay.delayTime.value = 1.0;
+        this.delay.delayTime.value = stepLength * 0.75;
         this.delayDecay.gain.value = 0.0;
 
         this.delay.connect(this.delayDecay).connect(this.delay);
@@ -176,12 +176,14 @@ class Sequence {
     }
 
     /**
-     * Sets new step length AKA seconds per beat
+     * Sets new step length AKA seconds per beat. Scales echo time as well
      * @param {Number} newStepLength new step length in seconds
      */
     setStepLength(newStepLength) {
+        const delayRatio = this.delay.delayTime.value / this.stepLength;
         this.stepLength = newStepLength;
         this.measureLength = newStepLength * this.steps;
+        this.delay.delayTime.value = delayRatio * newStepLength;
     }
 
     setEchoDelay(newDelay) {
