@@ -20,7 +20,6 @@ class Sequence {
         // Boolean array
         this.track = new Array(this.steps);
         for(let i = 0; i < this.track.length; ++i) this.track[i] = false;
-        // this.track = this.track.map(() => false);
         // this.retriggers = Array(this.steps).map(() => false);
         /**
          * @type {AudioBufferSourceNode[]}
