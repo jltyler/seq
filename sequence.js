@@ -18,7 +18,8 @@ class Sequence {
 
         this.measureLength = stepLength * steps;
         // Boolean array
-        this.track = new Array(this.steps).map(() => false);
+        this.track = new Array(this.steps);
+        this.track = this.track.map(() => false);
         // this.retriggers = Array(this.steps).map(() => false);
         /**
          * @type {AudioBufferSourceNode[]}
@@ -148,6 +149,10 @@ class Sequence {
      */
     setBuffer(newBuffer) {
         this.source = newBuffer;
+    }
+
+    setTrackFromArray(arr) {
+        this.track = arr.map((b) => b ? true : false);
     }
 
     /**
