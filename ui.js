@@ -50,13 +50,16 @@ const initialize = async () => {
         tracksContainer.innerHTML += html;
     };
 
-    attemptLoadAudio(context, './kick.ogg', addTrack);
-    attemptLoadAudio(context, './snare1.ogg', addTrack);
-    attemptLoadAudio(context, './hat.ogg', addTrack);
-    attemptLoadAudio(context, './ice.ogg', addTrack);
     attemptLoadAudio(context, './clap.ogg', addTrack);
-    attemptLoadAudio(context, './wood.ogg', addTrack);
+    attemptLoadAudio(context, './hatA.ogg', addTrack);
+    attemptLoadAudio(context, './hatB.ogg', addTrack);
+    attemptLoadAudio(context, './ice.ogg', addTrack);
+    attemptLoadAudio(context, './kick.ogg', addTrack);
+    attemptLoadAudio(context, './perc.ogg', addTrack);
+    attemptLoadAudio(context, './snareA.ogg', addTrack);
+    attemptLoadAudio(context, './snareB.ogg', addTrack);
     attemptLoadAudio(context, './tom.ogg', addTrack);
+    attemptLoadAudio(context, './wood.ogg', addTrack);
 
     buttonPlay.disabled = true;
     buttonStop.disabled = true;
